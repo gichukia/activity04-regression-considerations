@@ -6,3 +6,80 @@ output: github_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+```{r, message=FALSE, warning=FALSE}
+# Required packages
+library(tidyverse)
+library(tidymodels)
+```
+
+```{r, message=FALSE, warning=FALSE}
+library(GGally)
+```
+
+# Loading the data
+
+```{r}
+evals <- readr::read_tsv("https://www.openintro.org/data/tab-delimited/evals.txt")
+```
+
+
+```{r}
+glimpse(evals)
+```
+
+Plotting a density graph to display the distribution of score
+
+```{r}
+ggplot(evals, aes(x = score)) +
+  geom_density()
+```
+
+The density distribution of score variable is negatively skewed.s
+
+```{r}
+ggplot(evals, aes(x = age,y = score)) +
+  geom_point()
+```
+
+# Pairwise Relationships for beauty rating variables
+
+```{r}
+evals %>%
+  select(starts_with("bty_")) %>%
+  ggpairs()
+```
+
+All of the variables have high correlation so using all of them in the regression model will not add much value. Thus we can use average beauty score to represent the seven variables in the model.
+
+# Multiple linear regression: one quantitative predictor, one qualitative predictor
+
+```{r}
+m_bty_gen <- lm(score ~ bty_avg + gender, data = evals)
+tidy(m_bty_gen)
+summary(m_bty_gen)
+```
+The R squared is very low.
+
+```{r}
+m_bty_gen = lm(score ~ bty_avg + gender, data = evals)
+qqnorm(m_bty_gen$residuals)
+qqline(m_bty_gen$residuals)
+```
+
+We can assume that the data is pretty much normal.
+
+```{r}
+plot(m_bty_gen$residuals)
+abline(h = 0, lty = 3)
+```
+
+The data also appears to be linear so the assumption are met.
+
+Model for beauty average and rank
+
+```{r}
+m_bty_rank = lm(score ~ bty_avg + rank, data = evals)
+summary(m_bty_rank)
+```
+
